@@ -11,9 +11,19 @@ class Analyzer:
         self.data: landmark_pb2.NormalizedLandmarkList() = None
         self.detectionFrame = 0
 
-        # For scaling
+        self.width = pyautogui.size().width
+        self.height = pyautogui.size().height
+
+        # For Scaling
         self.control = 0
         self.speed = 0
+
+        # For Rotation
+        self.initialX = 0
+
+        self.control = 0
+        self.x = pyautogui.position().x
+        self.y = pyautogui.position().y
 
     def addData(self, data: landmark_pb2.NormalizedLandmarkList()):
         self.data = data
@@ -55,8 +65,27 @@ class Analyzer:
         self.detectionFrame += 1
 
     def rotate(self):
-        diff_x = abs(self.data.landmark[12].x - self.data.landmark[8].x)
-        diff_y = abs(self.data.landmark[12].y - self.data.landmark[8].y)
+        # Idea behind Rotation
+        # Upon detection, have the first position of the finger marked as the center.
+        # Measure the difference in the x and y-axis
+        # Appropriately normalize the new vector to that of the mouse,
 
-        diff = math.sqrt(diff_x ** 2 + diff_y ** 2) * 500
-        print(diff)
+        # Measure x-axis
+        diff = round(self.data.landmark[8].x, 3)  # Pointer finger tip
+        if self.detectionFrame == 0:
+            self.control = diff
+
+        self.x = (diff - self.control)
+
+        # diff_x = abs(self.data.landmark[12].x - self.data.landmark[8].x)
+        # diff_y = abs(self.data.landmark[12].y - self.data.landmark[8].y)
+        # print(diff_x * 500, diff_y * 500)
+
+
+        print(diff, self.control)
+        print(self.x)
+        pyautogui.mouseDown(button="middle")
+        pyautogui.moveTo(x=self.x)
+        pyautogui.mouseUp(button="middle")
+        self.detectionFrame += 1
+

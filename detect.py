@@ -110,12 +110,12 @@ def run(model: str, num_hands: int,
         detector.detect_async(mp_image, time.time_ns() // 1_000_000)
 
         # Show the FPS
-        fps_text = 'FPS = {:.1f}'.format(FPS)
-        text_location = (left_margin, row_size)
-        current_frame = image
-        cv2.putText(current_frame, fps_text, text_location,
-                    cv2.FONT_HERSHEY_DUPLEX,
-                    font_size, text_color, font_thickness, cv2.LINE_AA)
+        # fps_text = 'FPS = {:.1f}'.format(FPS)
+        # text_location = (left_margin, row_size)
+        # current_frame = image
+        # cv2.putText(current_frame, fps_text, text_location,
+        #             cv2.FONT_HERSHEY_DUPLEX,
+        #             font_size, text_color, font_thickness, cv2.LINE_AA)
 
         # Landmark visualization parameters.
         MARGIN = 10  # pixels
@@ -128,7 +128,7 @@ def run(model: str, num_hands: int,
             for idx in range(len(DETECTION_RESULT.hand_landmarks)):
                 hand_landmarks = DETECTION_RESULT.hand_landmarks[idx]
                 handedness = DETECTION_RESULT.handedness[idx]
-
+                print(idx)
                 # Draw the hand landmarks.
                 hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
                 hand_landmarks_proto.landmark.extend([
@@ -136,31 +136,31 @@ def run(model: str, num_hands: int,
                                                     z=landmark.z) for landmark
                     in hand_landmarks
                 ])
-                a.addData(hand_landmarks_proto)
 
+                a.addData(hand_landmarks_proto)
                 a.rotate()
 
-                mp_drawing.draw_landmarks(
-                    current_frame,
-                    hand_landmarks_proto,
-                    mp_hands.HAND_CONNECTIONS,
-                    mp_drawing_styles.get_default_hand_landmarks_style(),
-                    mp_drawing_styles.get_default_hand_connections_style())
+                # mp_drawing.draw_landmarks(
+                #     current_frame,
+                #     hand_landmarks_proto,
+                #     mp_hands.HAND_CONNECTIONS,
+                #     mp_drawing_styles.get_default_hand_landmarks_style(),
+                #     mp_drawing_styles.get_default_hand_connections_style())
 
                 # Get the top left corner of the detected hand's bounding box.
-                height, width, _ = current_frame.shape
-                x_coordinates = [landmark.x for landmark in hand_landmarks]
-                y_coordinates = [landmark.y for landmark in hand_landmarks]
-                text_x = int(min(x_coordinates) * width)
-                text_y = int(min(y_coordinates) * height) - MARGIN
+                # height, width, _ = current_frame.shape
+                # x_coordinates = [landmark.x for landmark in hand_landmarks]
+                # y_coordinates = [landmark.y for landmark in hand_landmarks]
+                # text_x = int(min(x_coordinates) * width)
+                # text_y = int(min(y_coordinates) * height) - MARGIN
 
                 # Draw handedness (left or right hand) on the image.
-                cv2.putText(current_frame, f"{handedness[0].category_name}",
-                            (text_x, text_y), cv2.FONT_HERSHEY_DUPLEX,
-                            FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS,
-                            cv2.LINE_AA)
+                # cv2.putText(current_frame, f"{handedness[0].category_name}",
+                #             (text_x, text_y), cv2.FONT_HERSHEY_DUPLEX,
+                #             FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS,
+                #             cv2.LINE_AA)
 
-        cv2.imshow('hand_landmarker', current_frame)
+        # cv2.imshow('hand_landmarker', current_frame)
 
         # Stop the program if the q key is pressed.
         if cv2.waitKey(1) == ord("q"):
@@ -168,7 +168,7 @@ def run(model: str, num_hands: int,
 
     detector.close()
     cap.release()
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()
 
 
 def main():
