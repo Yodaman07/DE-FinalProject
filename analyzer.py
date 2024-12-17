@@ -3,6 +3,7 @@ import math
 from mediapipe.framework.formats import landmark_pb2
 import pyautogui
 from numpy.core.defchararray import lower, upper
+from numpy.random import normal
 
 
 class Analyzer:
@@ -22,11 +23,22 @@ class Analyzer:
         self.initialX = 0
 
         self.control = 0
-        self.x = pyautogui.position().x
-        self.y = pyautogui.position().y
+        self.minVal = 0
+        self.maxVal = 1
+
+
+        # self.x = pyautogui.position().x
+        # self.y = pyautogui.position().y
 
     def addData(self, data: landmark_pb2.NormalizedLandmarkList()):
         self.data = data
+
+    def normalize(self, val, minVal, maxVal) -> int:
+        # range is 0 to self.width
+        # https://stats.stackexchange.com/questions/281162/scale-a-number-between-a-range
+        normalized = self.width * ((val - minVal) / (maxVal - minVal))
+        return normalized
+
 
     def scale(self):
         # iterate #https://stackoverflow.com/questions/71567928/typeerror-normalizedlandmarklist-object-is-not-iterable-mediapipe
@@ -72,20 +84,19 @@ class Analyzer:
 
         # Measure x-axis
         diff = round(self.data.landmark[8].x, 3)  # Pointer finger tip
-        if self.detectionFrame == 0:
-            self.control = diff
 
-        self.x = (diff - self.control)
+        # default scale is from 0 to 1
+
+        # if self.detectionFrame == 0:
+        #     self.normalize(diff, 0, 1)
+        #
+        # self.x = (diff - self.control)
 
         # diff_x = abs(self.data.landmark[12].x - self.data.landmark[8].x)
         # diff_y = abs(self.data.landmark[12].y - self.data.landmark[8].y)
         # print(diff_x * 500, diff_y * 500)
 
-
-        print(diff, self.control)
-        print(self.x)
         pyautogui.mouseDown(button="middle")
-        pyautogui.moveTo(x=self.x)
+        pyautogui.moveTo(x=self.normalize(diff, 0, 1))
         pyautogui.mouseUp(button="middle")
         self.detectionFrame += 1
-
