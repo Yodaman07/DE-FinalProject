@@ -59,8 +59,8 @@ def run(model: str, num_hands: int,
 
     # Start capturing video input from the camera
     cap = cv2.VideoCapture(camera_id)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width/4)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height/4)
 
     # Visualization parameters
     row_size = 50  # pixels
@@ -97,6 +97,7 @@ def run(model: str, num_hands: int,
     # Continuously capture images from the camera and run inference
     while cap.isOpened():
         success, image = cap.read()
+
         if not success:
             sys.exit(
                 'ERROR: Unable to read from webcam. Please verify your webcam settings.'
@@ -110,9 +111,9 @@ def run(model: str, num_hands: int,
         detector.detect_async(mp_image, time.time_ns() // 1_000_000)
 
         # Show the FPS
-        # fps_text = 'FPS = {:.1f}'.format(FPS)
-        # text_location = (left_margin, row_size)
-        # current_frame = image
+        fps_text = 'FPS = {:.1f}'.format(FPS)
+        text_location = (left_margin, row_size)
+        current_frame = image
         # cv2.putText(current_frame, fps_text, text_location,
         #             cv2.FONT_HERSHEY_DUPLEX,
         #             font_size, text_color, font_thickness, cv2.LINE_AA)
@@ -128,7 +129,7 @@ def run(model: str, num_hands: int,
             for idx in range(len(DETECTION_RESULT.hand_landmarks)):
                 hand_landmarks = DETECTION_RESULT.hand_landmarks[idx]
                 handedness = DETECTION_RESULT.handedness[idx]
-                print(idx)
+
                 # Draw the hand landmarks.
                 hand_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
                 hand_landmarks_proto.landmark.extend([
@@ -148,11 +149,11 @@ def run(model: str, num_hands: int,
                 #     mp_drawing_styles.get_default_hand_connections_style())
 
                 # Get the top left corner of the detected hand's bounding box.
-                # height, width, _ = current_frame.shape
-                # x_coordinates = [landmark.x for landmark in hand_landmarks]
-                # y_coordinates = [landmark.y for landmark in hand_landmarks]
-                # text_x = int(min(x_coordinates) * width)
-                # text_y = int(min(y_coordinates) * height) - MARGIN
+                height, width, _ = current_frame.shape
+                x_coordinates = [landmark.x for landmark in hand_landmarks]
+                y_coordinates = [landmark.y for landmark in hand_landmarks]
+                text_x = int(min(x_coordinates) * width)
+                text_y = int(min(y_coordinates) * height) - MARGIN
 
                 # Draw handedness (left or right hand) on the image.
                 # cv2.putText(current_frame, f"{handedness[0].category_name}",
