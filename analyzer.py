@@ -32,10 +32,11 @@ class Analyzer:
     def addData(self, data: landmark_pb2.NormalizedLandmarkList()):
         self.data = data
 
-    def normalize(self, val, minVal, maxVal) -> int:
-        # range is 0 to self.width
+    def normalize(self, val, minVal, maxVal, minRange, maxRange) -> int:
+        # X range is 0 to self.width
+
         # https://stats.stackexchange.com/questions/281162/scale-a-number-between-a-range
-        normalized = self.width * ((val - minVal) / (maxVal - minVal))
+        normalized = (maxRange-minRange) * ((val - minVal) / (maxVal - minVal)) + minRange
         return normalized
 
     def release(self):
@@ -85,18 +86,15 @@ class Analyzer:
         # Appropriately normalize the new vector to that of the mouse,
 
         # Measure x-axis
-        diff = round(self.data.landmark[8].x, 3)  # Pointer finger tip
+        diff_x = round(self.data.landmark[8].x, 3)  # Pointer finger tip
+
+        #get y-axis data
+        diff_y = round(self.data.landmark[8].y, 3)  # Pointer finger tip
 
         # default scale is from 0 to 1
 
         if self.detectionFrame == 0:
             pyautogui.mouseDown(button="middle")
-        #
-        # self.x = (diff - self.control)
 
-        # diff_x = abs(self.data.landmark[12].x - self.data.landmark[8].x)
-        # diff_y = abs(self.data.landmark[12].y - self.data.landmark[8].y)
-        # print(diff_x * 500, diff_y * 500)
-
-        pyautogui.moveTo(x=self.normalize(diff, 0, 1))
+        pyautogui.moveTo(x=self.normalize(diff_x, 0, 1, 0, self.width), y=self.normalize(diff_y, 0, 1, 0, self.height))
         self.detectionFrame += 1
