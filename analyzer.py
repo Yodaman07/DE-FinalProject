@@ -26,7 +26,6 @@ class Analyzer:
         self.minVal = 0
         self.maxVal = 1
 
-
         # self.x = pyautogui.position().x
         # self.y = pyautogui.position().y
 
@@ -39,6 +38,9 @@ class Analyzer:
         normalized = self.width * ((val - minVal) / (maxVal - minVal))
         return normalized
 
+    def release(self):
+        pyautogui.mouseUp(button="middle")
+        self.detectionFrame = 0
 
     def scale(self):
         # iterate #https://stackoverflow.com/questions/71567928/typeerror-normalizedlandmarklist-object-is-not-iterable-mediapipe
@@ -87,8 +89,8 @@ class Analyzer:
 
         # default scale is from 0 to 1
 
-        # if self.detectionFrame == 0:
-        #     self.normalize(diff, 0, 1)
+        if self.detectionFrame == 0:
+            pyautogui.mouseDown(button="middle")
         #
         # self.x = (diff - self.control)
 
@@ -96,7 +98,5 @@ class Analyzer:
         # diff_y = abs(self.data.landmark[12].y - self.data.landmark[8].y)
         # print(diff_x * 500, diff_y * 500)
 
-        pyautogui.mouseDown(button="middle")
         pyautogui.moveTo(x=self.normalize(diff, 0, 1))
-        pyautogui.mouseUp(button="middle")
         self.detectionFrame += 1

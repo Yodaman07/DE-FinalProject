@@ -13,7 +13,6 @@
 # limitations under the License.
 """Main scripts to run hand landmarker."""
 
-import argparse
 import sys
 import time
 
@@ -36,10 +35,11 @@ START_TIME = time.time()
 DETECTION_RESULT = None
 
 
-def run(model: str, num_hands: int,
-        min_hand_detection_confidence: float,
-        min_hand_presence_confidence: float, min_tracking_confidence: float,
-        camera_id: int, width: int, height: int, a: Analyzer) -> None:
+def run(model: str = "hand_landmarker.task", num_hands: int = 1,
+        min_hand_detection_confidence: float = 0.5,
+        min_hand_presence_confidence: float = 0.5, min_tracking_confidence: float = 0.5,
+        camera_id: int = 0, width: int = 1280, height: int = 960, a: Analyzer = Analyzer(),
+        showStream: bool = False) -> None:
     """Continuously run inference on images acquired from the camera.
 
   Args:
@@ -54,13 +54,14 @@ def run(model: str, num_hands: int,
       camera_id: The camera id to be passed to OpenCV.
       width: The width of the frame captured from the camera.
       height: The height of the frame captured from the camera.
-    a: Analyser
+      a: Analyser
+      showStream: Should the stream be displayed? It lags a bit
   """
 
     # Start capturing video input from the camera
     cap = cv2.VideoCapture(camera_id)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width/4)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height/4)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
     # Visualization parameters
     row_size = 50  # pixels
@@ -111,12 +112,13 @@ def run(model: str, num_hands: int,
         detector.detect_async(mp_image, time.time_ns() // 1_000_000)
 
         # Show the FPS
-        fps_text = 'FPS = {:.1f}'.format(FPS)
-        text_location = (left_margin, row_size)
-        current_frame = image
-        # cv2.putText(current_frame, fps_text, text_location,
-        #             cv2.FONT_HERSHEY_DUPLEX,
-        #             font_size, text_color, font_thickness, cv2.LINE_AA)
+        if showStream:
+            fps_text = 'FPS = {:.1f}'.format(FPS)
+            text_location = (left_margin, row_size)
+            current_frame = image
+            cv2.putText(current_frame, fps_text, text_location,
+                        cv2.FONT_HERSHEY_DUPLEX,
+                        font_size, text_color, font_thickness, cv2.LINE_AA)
 
         # Landmark visualization parameters.
         MARGIN = 10  # pixels
@@ -141,27 +143,32 @@ def run(model: str, num_hands: int,
                 a.addData(hand_landmarks_proto)
                 a.rotate()
 
-                # mp_drawing.draw_landmarks(
-                #     current_frame,
-                #     hand_landmarks_proto,
-                #     mp_hands.HAND_CONNECTIONS,
-                #     mp_drawing_styles.get_default_hand_landmarks_style(),
-                #     mp_drawing_styles.get_default_hand_connections_style())
+                if showStream:
+                    mp_drawing.draw_landmarks(
+                        current_frame,
+                        hand_landmarks_proto,
+                        mp_hands.HAND_CONNECTIONS,
+                        mp_drawing_styles.get_default_hand_landmarks_style(),
+                        mp_drawing_styles.get_default_hand_connections_style())
 
-                # Get the top left corner of the detected hand's bounding box.
-                height, width, _ = current_frame.shape
-                x_coordinates = [landmark.x for landmark in hand_landmarks]
-                y_coordinates = [landmark.y for landmark in hand_landmarks]
-                text_x = int(min(x_coordinates) * width)
-                text_y = int(min(y_coordinates) * height) - MARGIN
+                    # Get the top left corner of the detected hand's bounding box.
+                    height, width, _ = current_frame.shape
+                    x_coordinates = [landmark.x for landmark in hand_landmarks]
+                    y_coordinates = [landmark.y for landmark in hand_landmarks]
+                    text_x = int(min(x_coordinates) * width)
+                    text_y = int(min(y_coordinates) * height) - MARGIN
 
-                # Draw handedness (left or right hand) on the image.
-                # cv2.putText(current_frame, f"{handedness[0].category_name}",
-                #             (text_x, text_y), cv2.FONT_HERSHEY_DUPLEX,
-                #             FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS,
-                #             cv2.LINE_AA)
+                    # Draw handedness (left or right hand) on the image.
+                    cv2.putText(current_frame, f"{handedness[0].category_name}",
+                                (text_x, text_y), cv2.FONT_HERSHEY_DUPLEX,
+                                FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS,
+                                cv2.LINE_AA)
 
-        # cv2.imshow('hand_landmarker', current_frame)
+                if len(DETECTION_RESULT.hand_landmarks) < 1:  # if no hand landmarks are detected
+                    a.release()  # stops detecting and resets frame count
+
+        if showStream:
+            cv2.imshow('hand_landmarker', current_frame)
 
         # Stop the program if the q key is pressed.
         if cv2.waitKey(1) == ord("q"):
@@ -169,73 +176,8 @@ def run(model: str, num_hands: int,
 
     detector.close()
     cap.release()
-    # cv2.destroyAllWindows()
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        '--model',
-        help='Name of the hand landmarker model bundle.',
-        required=False,
-        type=str,
-        default='hand_landmarker.task')
-    parser.add_argument(
-        '--numHands',
-        help='Max number of hands that can be detected by the landmarker.',
-        required=False,
-        type=int,
-        default=1)
-    parser.add_argument(
-        '--minHandDetectionConfidence',
-        help='The minimum confidence score for hand detection to be considered '
-             'successful.',
-        required=False,
-        type=float,
-        default=0.5)
-    parser.add_argument(
-        '--minHandPresenceConfidence',
-        help='The minimum confidence score of hand presence score in the hand '
-             'landmark detection.',
-        required=False,
-        type=float,
-        default=0.5)
-    parser.add_argument(
-        '--minTrackingConfidence',
-        help='The minimum confidence score for the hand tracking to be '
-             'considered successful.',
-        required=False,
-        type=float,
-        default=0.5)
-    # Finding the camera ID can be very reliant on platform-dependent methods.
-    # One common approach is to use the fact that camera IDs are usually indexed sequentially by the OS, starting from 0.
-    # Here, we use OpenCV and create a VideoCapture object for each potential ID with 'cap = cv2.VideoCapture(i)'.
-    # If 'cap' is None or not 'cap.isOpened()', it indicates the camera ID is not available.
-    parser.add_argument(
-        '--cameraId',
-        help='Id of camera.',
-        required=False,
-        type=int,
-        default=0)
-    parser.add_argument(
-        '--frameWidth',
-        help='Width of frame to capture from camera.',
-        required=False,
-        type=int,
-        default=1280)
-    parser.add_argument(
-        '--frameHeight',
-        help='Height of frame to capture from camera.',
-        required=False,
-        type=int,
-        default=960)
-    args = parser.parse_args()
-
-    run(args.model, args.numHands, args.minHandDetectionConfidence,
-        args.minHandPresenceConfidence, args.minTrackingConfidence,
-        args.cameraId, args.frameWidth, args.frameHeight, Analyzer())
+    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
-    main()
+    run()
