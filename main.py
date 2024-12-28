@@ -1,5 +1,4 @@
-import detect
-from mediapipe.tasks.python import vision
+from pi import detect
 
 if __name__ == "__main__":
     detect.run()
