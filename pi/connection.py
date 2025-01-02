@@ -7,11 +7,18 @@ class Connection:
 
     def openSerial(self, port):
         self.ser = serial.Serial(port, baudrate=9600)  # We are only sending numbers that are associated with keystrokes
-        self.ser.reset_input_buffer()
-        self.ser.reset_output_buffer()
+        # self.ser.reset_input_buffer()
+        # self.ser.reset_output_buffer()
 
     def sendData(self, data):
         self.ser.write(data)
 
     def closeSerial(self):
         self.ser.close()
+
+
+if __name__ == "__main__":
+    c = Connection()
+    c.openSerial("/dev/cu.usbmodem1101")
+    c.sendData("ahoduhsf".encode())
+    c.closeSerial()
