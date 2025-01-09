@@ -1,7 +1,6 @@
 from RPLCD.i2c import CharLCD
 from gpiozero import Button
 from signal import pause
-import time
 
 lcd = CharLCD('PCF8574', 0x27)
 btn = Button(4)

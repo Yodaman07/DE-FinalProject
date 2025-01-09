@@ -7,7 +7,7 @@ class Connection:
 
     def openSerial(self, port):
         self.ser = serial.Serial(port, baudrate=9600)  # We are only sending numbers that are associated with keystrokes
-        # self.ser.reset_input_buffer()
+        self.ser.reset_input_buffer()
         # self.ser.reset_output_buffer()
 
     def sendData(self, data):

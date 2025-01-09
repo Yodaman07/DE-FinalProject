@@ -2,8 +2,6 @@ import math
 
 from mediapipe.framework.formats import landmark_pb2
 import pyautogui
-from numpy.core.defchararray import lower, upper
-from numpy.random import normal
 
 
 class Analyzer:
@@ -19,28 +17,22 @@ class Analyzer:
         self.control = 0
         self.speed = 0
 
-        # For Rotation
-        self.initialX = 0
-
-        self.control = 0
-        self.minVal = 0
-        self.maxVal = 1
-
         # self.x = pyautogui.position().x
         # self.y = pyautogui.position().y
 
     def addData(self, data: landmark_pb2.NormalizedLandmarkList()):
         self.data = data
 
-    def normalize(self, val, minVal, maxVal, minRange, maxRange) -> int:
+    @staticmethod
+    def normalize(val, minVal, maxVal, minRange, maxRange) -> int:
         # X range is 0 to self.width
-
         # https://stats.stackexchange.com/questions/281162/scale-a-number-between-a-range
-        normalized = (maxRange-minRange) * ((val - minVal) / (maxVal - minVal)) + minRange
+        normalized = (maxRange - minRange) * ((val - minVal) / (maxVal - minVal)) + minRange
         return normalized
 
     def release(self):
-        pyautogui.mouseUp(button="middle")
+        print("mouseUp")
+        # pyautogui.mouseUp(button="middle")
         self.detectionFrame = 0
 
     def scale(self):
@@ -88,13 +80,14 @@ class Analyzer:
         # Measure x-axis
         diff_x = round(self.data.landmark[8].x, 3)  # Pointer finger tip
 
-        #get y-axis data
+        # get y-axis data
         diff_y = round(self.data.landmark[8].y, 3)  # Pointer finger tip
 
         # default scale is from 0 to 1
 
         if self.detectionFrame == 0:
-            pyautogui.mouseDown(button="middle")
+            print("mouseDown")
+            # pyautogui.mouseDown(button="middle")
 
         pyautogui.moveTo(x=self.normalize(diff_x, 0, 1, 0, self.width), y=self.normalize(diff_y, 0, 1, 0, self.height))
         self.detectionFrame += 1

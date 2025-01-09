@@ -23,7 +23,7 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from mediapipe.framework.formats import landmark_pb2
 
-from analyzer import Analyzer
+from pi.analyzer import Analyzer
 
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
@@ -35,7 +35,7 @@ START_TIME = time.time()
 DETECTION_RESULT = None
 
 
-def run(model: str = "hand_landmarker.task", num_hands: int = 1,
+def run(model: str = "pi/hand_landmarker.task", num_hands: int = 1,
         min_hand_detection_confidence: float = 0.5,
         min_hand_presence_confidence: float = 0.5, min_tracking_confidence: float = 0.5,
         camera_id: int = 0, width: int = 1280, height: int = 960, a: Analyzer = Analyzer(),
