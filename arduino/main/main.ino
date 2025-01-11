@@ -8,9 +8,10 @@ int coords[] = {0, 0};
 
 void setup() {
   // put your setup code here, to run once:
-  
-  Serial.begin(9600); //9600 bits/second
+  USB.begin();
   Mouse.begin();
+  Serial.begin(9600); //9600 bits/second
+  
 }
 //Testing code, implement with serial port data from the pi
 
@@ -75,3 +76,4 @@ void scanForOpperations(int data){
         break;
     }
 }
+
