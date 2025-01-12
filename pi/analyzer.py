@@ -3,7 +3,6 @@ import math
 from mediapipe.framework.formats import landmark_pb2
 import pyautogui
 
-
 class Analyzer:
 
     def __init__(self):
@@ -17,6 +16,7 @@ class Analyzer:
         self.control = 0
         self.speed = 0
 
+        self.detected = False
         # self.x = pyautogui.position().x
         # self.y = pyautogui.position().y
 
@@ -31,9 +31,19 @@ class Analyzer:
         return normalized
 
     def release(self):
-        print("mouseUp")
+        # print("mouseUp")
         # pyautogui.mouseUp(button="middle")
+
+        with open("pi/test.txt", "w") as t:
+            t.write("false")
         self.detectionFrame = 0
+
+    def lock(self):
+        with open("pi/test.txt", "w") as t:
+            t.write("true")
+
+        # print("mouseDown")
+        # pyautogui.mouseDown(button="middle")
 
     def scale(self):
         # iterate #https://stackoverflow.com/questions/71567928/typeerror-normalizedlandmarklist-object-is-not-iterable-mediapipe
@@ -86,8 +96,9 @@ class Analyzer:
         # default scale is from 0 to 1
 
         if self.detectionFrame == 0:
-            print("mouseDown")
-            # pyautogui.mouseDown(button="middle")
+            self.lock()
 
         pyautogui.moveTo(x=self.normalize(diff_x, 0, 1, 0, self.width), y=self.normalize(diff_y, 0, 1, 0, self.height))
         self.detectionFrame += 1
+
+

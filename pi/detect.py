@@ -24,6 +24,7 @@ from mediapipe.tasks.python import vision
 from mediapipe.framework.formats import landmark_pb2
 
 from pi.analyzer import Analyzer
+from pi import analyzer
 
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
