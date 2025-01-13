@@ -165,8 +165,8 @@ def run(model: str = "pi/hand_landmarker.task", num_hands: int = 1,
                                 FONT_SIZE, HANDEDNESS_TEXT_COLOR, FONT_THICKNESS,
                                 cv2.LINE_AA)
 
-                if len(DETECTION_RESULT.hand_landmarks) < 1:  # if no hand landmarks are detected
-                    a.release()  # stops detecting and resets frame count
+            if len(DETECTION_RESULT.hand_landmarks) < 1:  # if no hand landmarks are detected
+                a.release()  # stops detecting and resets frame count
 
         if showStream:
             cv2.imshow('hand_landmarker', current_frame)

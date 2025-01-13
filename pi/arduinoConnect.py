@@ -2,8 +2,8 @@ import os
 from dotenv import load_dotenv
 import logging
 from arduino_iot_cloud import ArduinoCloudClient
-from testing.connecting import logging_func
 import time
+import json
 
 
 class Connection:
@@ -15,6 +15,7 @@ class Connection:
         self.client: ArduinoCloudClient = None
 
     # help from https://github.com/arduino/arduino-iot-cloud-py
+
     @staticmethod
     def logging_func():
         logging.basicConfig(
@@ -24,9 +25,11 @@ class Connection:
         )
 
     def connect(self):
-        logging_func()
+        self.logging_func()
         client = ArduinoCloudClient(device_id=self.id, username=self.id, password=self.key, sync_mode=True)
-        client.register("status", value=False)
+        client.register("mouseState", value=-1)
+        client.register("mouseX", value=-1)
+        client.register("mouseY", value=-1)
         self.client = client
 
         client.start()
@@ -34,11 +37,12 @@ class Connection:
         while True:
             client.update()
 
-            with open("pi/test.txt", "r") as t:
-                if t.readline() == "true":
-                    client["status"] = True
-                    print("true")
-                else:
-                    client["status"] = False
+            with open("pi/data.json", "r") as o:
+                json_obj = json.load(o)
+
+            print(json_obj)
+            client["mouseState"] = json_obj["mouseState"]
+            client["mouseX"] = json_obj["mouseX"]
+            client["mouseY"] = json_obj["mouseY"]
 
             time.sleep(0.100)

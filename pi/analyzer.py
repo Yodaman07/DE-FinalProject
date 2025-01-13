@@ -2,6 +2,8 @@ import math
 
 from mediapipe.framework.formats import landmark_pb2
 import pyautogui
+import json
+
 
 class Analyzer:
 
@@ -17,6 +19,14 @@ class Analyzer:
         self.speed = 0
 
         self.detected = False
+
+        self.jsonData = {
+            "mouseX": -1,
+            "mouseY": -1,
+            "mouseState": -1
+        }
+        self.saveData()
+
         # self.x = pyautogui.position().x
         # self.y = pyautogui.position().y
 
@@ -31,19 +41,25 @@ class Analyzer:
         return normalized
 
     def release(self):
+
+        self.jsonData["mouseState"] = 11
+        self.jsonData["mouseX"] = -1
+        self.jsonData["mouseY"] = -1 # says that mouseX and Y are not used
+        self.saveData()
+        self.detectionFrame = 0
+
         # print("mouseUp")
         # pyautogui.mouseUp(button="middle")
 
-        with open("pi/test.txt", "w") as t:
-            t.write("false")
-        self.detectionFrame = 0
-
     def lock(self):
-        with open("pi/test.txt", "w") as t:
-            t.write("true")
-
+        self.jsonData["mouseState"] = 10
+        self.saveData()
         # print("mouseDown")
         # pyautogui.mouseDown(button="middle")
+
+    def saveData(self):
+        with open("pi/data.json", "w") as o:
+            o.write(json.dumps(self.jsonData, indent=4))
 
     def scale(self):
         # iterate #https://stackoverflow.com/questions/71567928/typeerror-normalizedlandmarklist-object-is-not-iterable-mediapipe
@@ -94,11 +110,13 @@ class Analyzer:
         diff_y = round(self.data.landmark[8].y, 3)  # Pointer finger tip
 
         # default scale is from 0 to 1
-
         if self.detectionFrame == 0:
             self.lock()
 
-        pyautogui.moveTo(x=self.normalize(diff_x, 0, 1, 0, self.width), y=self.normalize(diff_y, 0, 1, 0, self.height))
+        x = self.normalize(diff_x, 0, 1, 0, self.width)
+        y = self.normalize(diff_y, 0, 1, 0, self.height)
+        self.jsonData["mouseX"] = int(x)
+        self.jsonData["mouseY"] = int(y) # calculates and saves x & y positions
+        self.saveData()
+
         self.detectionFrame += 1
-
-
