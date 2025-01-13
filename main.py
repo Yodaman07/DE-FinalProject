@@ -12,15 +12,15 @@ def arduino():
 
 
 if __name__ == "__main__":
-    #https://www.geeksforgeeks.org/multithreading-python-set-1/
-
-    t1 = threading.Thread(target=cam)
-    t2 = threading.Thread(target=arduino)
-
-    t1.start()
-    t2.start()
-
-    t1.join()
-    t2.join()
+    # https://www.geeksforgeeks.org/multithreading-python-set-1/
+    cam()
+    # t1 = threading.Thread(target=cam)
+    # t2 = threading.Thread(target=arduino)
+    #
+    # t1.start()
+    # t2.start()
+    #
+    # t1.join()
+    # t2.join()
 
     print("Finished")
