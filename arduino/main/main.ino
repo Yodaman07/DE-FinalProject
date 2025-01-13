@@ -1,54 +1,56 @@
+#include "thingProperties.h"
 #include "USB.h"
 #include "USBHIDMouse.h"
+
+
+
 USBHIDMouse Mouse;
 
-bool movementActive = false;
-int activeReadingState = 1; // 1 is x coord, 2 is y coord
-int coords[] = {0, 0};
 
+bool movementActive = false;
 void setup() {
-  // put your setup code here, to run once:
+  // Initialize serial and wait for port to open:
+  Serial.begin(9600);
+  // This delay gives the chance to wait for a Serial Monitor without blocking if none is found
+  delay(1500);
+
+  // Defined in thingProperties.h
+  initProperties();
+
+  // Connect to Arduino IoT Cloud
+  ArduinoCloud.begin(ArduinoIoTPreferredConnection);
+
+  /*
+     The following function allows you to obtain more information
+     related to the state of network and IoT Cloud connection and errors
+     the higher number the more granular information you’ll get.
+     The default is 0 (only errors).
+     Maximum is 4
+ */
+  setDebugMessageLevel(2);
+  ArduinoCloud.printDebugInfo();
+
   USB.begin();
   Mouse.begin();
-  Serial.begin(9600); //9600 bits/second
-  
 }
-//Testing code, implement with serial port data from the pi
 
 void loop() {
-  
+  ArduinoCloud.update();
+  // Your code here
+
   // put your main code here, to run repeatedly:
-  String data = "";
-  if (Serial.available() > 0){
-      data = Serial.readString();
-  }
-  int intData = data.toInt();
-
-  switch (intData){
-     case 123456788:
-      //Start Mouse Movement: All subsequent values will alternate between x and y values
+  if ((mouseX != -1) && (mouseY !=-1) ){
+      // Serial.print(mouseX);
+      // Serial.print(" and ");
+      // Serial.print(mouseY);
+      // Serial.print(" ; ");
+      // Serial.println(movementActive);
+      Mouse.move(mouseX, mouseY);
       movementActive = true;
-      break;
-    case 123456789:
-      //End Mouse Movement: All other values will be read as mouse presses
-      movementActive = false;
-      break;
-  }
+  }else{movementActive = false;}
 
-  if ((data != "") && (movementActive)){
-    if (activeReadingState == 1){coords[0] = intData;} //update x val
-    if (activeReadingState == 2){coords[1] = intData;} // update y val
+  if (!movementActive){scanForOpperations(mouseState);} //Listening for other mouse signals if movement isn't active
 
-    activeReadingState++;
-
-    if (activeReadingState==2){
-      Mouse.move(coords[0],coords[1]);
-      activeReadingState = 1;
-    }
-  }
-  
-  if (!movementActive){scanForOpperations(intData);} //Listening for other mouse signals if movement isn't active
-  
 }
 
 void scanForOpperations(int data){
@@ -77,3 +79,27 @@ void scanForOpperations(int data){
     }
 }
 
+/*
+  Since MouseX is READ_WRITE variable, onMouseXChange() is
+  executed every time a new value is received from IoT Cloud.
+*/
+void onMouseXChange()  {
+  // Add your code here to act upon MouseX change
+}
+
+
+/*
+  Since MouseY is READ_WRITE variable, onMouseYChange() is
+  executed every time a new value is received from IoT Cloud.
+*/
+void onMouseYChange()  {
+  // Add your code here to act upon MouseY change
+}
+
+/*
+  Since MouseState is READ_WRITE variable, onMouseStateChange() is
+  executed every time a new value is received from IoT Cloud.
+*/
+void onMouseStateChange()  {
+  // Add your code here to act upon MouseState change
+}
