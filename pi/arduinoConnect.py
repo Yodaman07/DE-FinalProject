@@ -38,8 +38,8 @@ class Connection:
             client.update()
 
             with open("pi/data.json", "r") as o:
-
                 json_obj = json.load(o)
+
             if json_obj is not None:
                 print(json_obj)
                 client["mouseState"] = json_obj["mouseState"]

@@ -44,20 +44,18 @@ class Analyzer:
 
     def release(self):
 
-
         self.jsonData["mouseState"] = 31
-        # self.jsonData["mouseX"] = -1
-        # self.jsonData["mouseY"] = -1  # says that mouseX and Y are not used
+
         self.saveData()
         self.detectionFrame = 0
         # print("mouseUp")
-        pyautogui.mouseUp(button="middle")
+        # pyautogui.mouseUp(button="middle")
 
     def lock(self):
         self.jsonData["mouseState"] = 30
         self.saveData()
         # print("mouseDown")
-        pyautogui.mouseDown(button="middle")
+        # pyautogui.mouseDown(button="middle")
 
     def saveData(self):
         with open("pi/data.json", "w") as o:
@@ -122,10 +120,9 @@ class Analyzer:
         self.jsonData["mouseX"] = self.lastX - int(x)
         self.jsonData["mouseY"] = int(y) - self.lastY  # calculates and saves x & y differences
         self.saveData()
-        print("X: " + str(self.lastX - int(x)) + " and Y: " + str(int(y) - self.lastY))
+        # print("X: " + str(self.lastX - int(x)) + " and Y: " + str(int(y) - self.lastY))
 
-        # print()
-        pyautogui.moveRel(self.lastX - int(x), int(y) - self.lastY)
+        # pyautogui.moveRel(self.lastX - int(x), int(y) - self.lastY)
         self.lastX = int(x)
         self.lastY = int(y)
         self.detectionFrame += 1
